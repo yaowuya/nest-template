@@ -1,11 +1,19 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HelloModule } from './hello/hello.module';
+import { HelloModule } from './module/hello/hello.module';
+import { LoggerMiddleware } from './common/middleware/logger.middleware';
 
 @Module({
   imports: [HelloModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  configure(consumer: MiddlewareConsumer) {
+    // 为 hello 路由添加中间件
+    consumer.apply(LoggerMiddleware)
+      .exclude({ path: 'hello', method: RequestMethod.POST })
+      .forRoutes('hello');
+  }
+}
